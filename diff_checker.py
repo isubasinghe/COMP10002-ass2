@@ -2,6 +2,8 @@ import os
 from os import listdir
 import hashlib
 
+IS_HUMAN = False
+
 def get_diff_lines(line1, line2):
     flag = False
     if line1 != line2:
@@ -61,7 +63,8 @@ def main():
         exit(1)
     flag = False
     for i in range(0, len(test_files)):
-        input("""Press <Enter> when you are ready for the next file, warning this process will clear the screen""")
+        if IS_HUMAN:
+            input("""Press <Enter> when you are ready for the next file, warning this process will clear the screen""")
         os.system('cls' if os.name == 'nt' else 'clear')
         if test_files[i].endswith('.txt'):
             get_diff('./test_cases/' + test_files[i], './output_cases/' + test_files[i])
