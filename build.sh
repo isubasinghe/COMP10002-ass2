@@ -1,5 +1,6 @@
-#!bin/bash
+#!/bin/bash
 
 echo "Environment: `uname -a`"
-echo "Compiler: `$CC --version`"
-gcc ass2-soln.c -Wall -lm -o ass2 -std=gnu89
+echo "Compiler: `$CXX --version`"
+
+make || exit 1

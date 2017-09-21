@@ -1,7 +1,4 @@
-sudo: false
 language: c
 compiler: gcc
 
-
-script: "bash -c chmod +x build.sh"
 script: "bash -c ./build.sh"
