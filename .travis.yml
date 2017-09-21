@@ -1,4 +1,7 @@
 language: c
 compiler: gcc
 
+before_install:
+  - chmod +x build.sh
+
 script: "bash -c ./build.sh"
