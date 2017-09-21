@@ -6,3 +6,4 @@ gcc ass2-soln.c -Wall -lm -o ass2
 ls
 chmod +x ass2
 ./ass2
+python diff_checker.py
