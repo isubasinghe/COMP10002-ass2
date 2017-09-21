@@ -7,6 +7,4 @@ python:
 before_install:
   - chmod +x build.sh
 
-
 script: "bash -c ./build.sh"
-script: "python diff_checker.py"
