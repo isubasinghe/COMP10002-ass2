@@ -1,5 +1,5 @@
 language: c
-compiler: gcc-4.4.7
+compiler: gcc-4
 
 python:
   -"3.5"
