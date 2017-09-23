@@ -1,5 +1,6 @@
+sudo: false
 language: c
-compiler: gcc-4
+compiler: gcc
 
 python:
   -"3.5"
