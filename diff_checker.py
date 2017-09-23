@@ -67,8 +67,7 @@ def main():
             input("""Press <Enter> when you are ready for the next file, warning this process will clear the screen""")
         os.system('cls' if os.name == 'nt' else 'clear')
         if test_files[i].endswith('.txt'):
-            get_diff('./test_cases/' + test_files[i], './output_cases/' + test_files[i])
-            flag = True
+            flag = flag or get_diff('./test_cases/' + test_files[i], './output_cases/' + test_files[i])
     print("Exiting with:", flag)
     exit(int(flag))
         
