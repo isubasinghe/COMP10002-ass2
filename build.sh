@@ -5,5 +5,5 @@ echo "Compiler: `$CC --version`"
 gcc ass2-soln.c -Wall -lm -o ass2
 ls
 chmod +x ass2
-./ass2
-python diff_checker.py
+./ass2 || exit 1
+python diff_checker.py || exit 1
