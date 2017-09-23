@@ -69,7 +69,8 @@ def main():
         if test_files[i].endswith('.txt'):
             get_diff('./test_cases/' + test_files[i], './output_cases/' + test_files[i])
             flag = True
-    exit(1 if flag==True else 0)
+    print("Exiting with:", flag)
+    exit(int(flag))
         
     
 
