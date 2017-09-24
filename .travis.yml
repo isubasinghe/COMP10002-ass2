@@ -1,4 +1,7 @@
 sudo: false
+env:
+  global:
+    - CODECOV_TOKEN=: 2718a3ef-1221-4f4a-bf36-68fbf688b4c7
 language: c
 compiler: gcc
 
