@@ -1,17 +1,14 @@
 sudo: false
-env:
-  global:
-    - CODECOV_TOKEN=: 2718a3ef-1221-4f4a-bf36-68fbf688b4c7
+
 language: c
 compiler: gcc
 
 python:
   -"3.5"
 
-  after_success:
-  - bash <(curl -s https://codecov.io/bash)
 
 before_install:
   - chmod +x build.sh
 
 script: "bash -c ./build.sh"
+
