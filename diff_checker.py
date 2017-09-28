@@ -59,7 +59,7 @@ def main():
     output_files = listdir('./output_cases')
 
     if len(test_files) != len(output_files):
-        print("Exiting the files do not match")
+        print("Exiting the number of files do not match")
         exit(1)
     flag = False
     for i in range(0, len(test_files)):
