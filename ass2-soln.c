@@ -47,8 +47,8 @@ typedef struct {
 
 typedef struct {
     node_t ** nodes_ptrs;
-    int size_x;
-    int size_y;
+    int size_rows;
+    int size_cols;
 } graph_t;
 
 int mygetchar();
@@ -64,6 +64,8 @@ void insert_to_graph(graph_t *, tokens_arr_t, int *, int *);
 void read_to_graph_and_dests(graph_t *, dests_t *, int *, int *);
 
 void free_graph(graph_t *);
+
+void my_A_star(graph_t * graph, char * loc);
 
 int mygetchar() {
     int c = getchar();
@@ -133,20 +135,20 @@ tokens_arr_t get_tokens(char * string, char * delim) {
     return tokens_c;
 }
 
-graph_t create_graph(int x, int y) {
+graph_t create_graph(int rows, int cols) {
     graph_t graph;
     /* create a matrix to represent the city */
-    node_t ** nodes_ptrs = malloc(x * sizeof(node_t *));
+    node_t ** nodes_ptrs = malloc(rows * sizeof(node_t *));
     int i = 0;
-    for(; i < x; i++) {
-        node_t * nodes = malloc(y * sizeof(node_t));
+    for(; i < rows; i++) {
+        node_t * nodes = malloc(cols * sizeof(node_t));
         assert(nodes != NULL);
         nodes_ptrs[i] = nodes;
     }
     assert(nodes_ptrs != NULL);
     graph.nodes_ptrs = nodes_ptrs;
-    graph.size_x = x;
-    graph.size_y = y;
+    graph.size_rows = rows;
+    graph.size_cols = cols;
     return graph;
 }
 
@@ -201,7 +203,7 @@ void read_to_graph_and_dests(graph_t * graph, dests_t * dests,
 
 void free_graph(graph_t * graph) {
     int i = 0;
-    for(; i < graph->size_x; i++) {
+    for(; i < graph->size_rows; i++) {
  
         free(graph->nodes_ptrs[i]);
     }
