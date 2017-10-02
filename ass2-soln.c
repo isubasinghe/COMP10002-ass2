@@ -41,10 +41,12 @@ typedef struct {
 } dests_t;
 
 typedef struct {
+    char * key;
     int left;
     int right;
     int up;
     int down;
+    int cost;
 } node_t;
 
 typedef struct {
@@ -60,6 +62,8 @@ char * read_line();
 tokens_arr_t get_tokens(char *, char *);
 
 graph_t create_graph(int, int);
+
+void loc_to_ints(char *, int *, int *);
 
 void insert_to_graph(graph_t *, tokens_arr_t, int *, int *);
 
@@ -155,19 +159,29 @@ graph_t create_graph(int rows, int cols) {
     return graph;
 }
 
+void loc_to_ints(char *loc, int * row, int * col) {
+    /* convert an char to an integer to access the graph by index*/
+    (*row) = loc[strlen(loc)-1] + SIMP_ASCII_TO_INT_DIFF;
+    /* if we set the last char to '\0' we can directly pass to atoi */
+    loc[strlen(loc) - 1] = '\0';
+    /* convert the integer sequence to an actual int*/
+    (*col) = atoi(loc);
+}
+
 void insert_to_graph(graph_t * graph, tokens_arr_t tc, 
         int * n_ps_paths, int * total_cost) {
-    /* convert an char to an integer to access the graph by index*/
-    int row = tc.tokens[0][strlen(tc.tokens[0])-1] + SIMP_ASCII_TO_INT_DIFF;
-    /* if we set the last char to '\0' we can directly pass to atoi */
-    tc.tokens[0][strlen(tc.tokens[0])-1] = '\0';
-    /* convert the integer sequence to an actual int*/
-    int col = atoi(tc.tokens[0]);
+
+    int row, col;
+    loc_to_ints(tc.tokens[0], &row, &col);
+
     node_t node;
+    node.key = strdup(tc.tokens[0]);
     node.left = atoi(tc.tokens[1]);
     node.up = atoi(tc.tokens[2]);
     node.right = atoi(tc.tokens[3]);
     node.down = atoi(tc.tokens[4]);
+    node.cost = INF;
+
     /* add the node to the matrix */
     graph->nodes_ptrs[row][col] = node;
 
@@ -216,13 +230,13 @@ void read_to_graph_and_dests(graph_t * graph, dests_t * dests,
 void free_graph(graph_t * graph) {
     int i = 0;
     for(; i < graph->size_rows; i++) {
- 
+        free(graph->nodes_ptrs[i]->key);
         free(graph->nodes_ptrs[i]);
     }
     free(graph->nodes_ptrs);
 }
 
-int main(int argc, char *argv[]) {
+int main() {
     /* read a line to get the dimensions of our matrix */
     char * line = read_line();
     tokens_arr_t tc = get_tokens(line, " ");
