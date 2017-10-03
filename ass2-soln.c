@@ -71,6 +71,14 @@ void insert_to_graph(graph_t *, tokens_arr_t, int *, int *);
 
 void read_to_graph_and_dests(graph_t *, dests_t *, int *, int *);
 
+int get_min(node_t **, int)
+
+int is_empty(node_t **, int);
+
+node_t * get_node(int, graph_t *, char *);
+
+void graph_set(graph_t *, char *);
+
 void free_graph(graph_t *);
 
 int mygetchar() {
@@ -189,11 +197,13 @@ void insert_to_graph(graph_t * graph, tokens_arr_t tc,
     loc_to_ints(tc.tokens[0], &row, &col);
 
     node_t node;
+    /* set the key of the node */
     node.key = strdup(tc.tokens[0]);
     node.right = atoi(tc.tokens[1]);
     node.up = atoi(tc.tokens[2]);
     node.left = atoi(tc.tokens[3]);
     node.down = atoi(tc.tokens[4]);
+    /* we set all the values to INF */
     node.cost = INF;
 
     /* add the node to the matrix */
@@ -232,7 +242,7 @@ void read_to_graph_and_dests(graph_t * graph, dests_t * dests,
             printf("Malformed input\n");
 
         }
-
+        /* free the tokens holder and the line */
         free(line);
         line = NULL;
         free(tc.tokens);
@@ -242,12 +252,15 @@ void read_to_graph_and_dests(graph_t * graph, dests_t * dests,
 }
 
 int get_min(node_t ** nodes, int size) {
-    int min = 999;
+    /* store the maximum value we can have */
+    int min = INF;
     int min_i = -1;
     int i = 0;
     for(; i < size; i++) {
+        /* ensure that the node isn't empty */
         if(nodes[i] != NULL) {
             if((*nodes[i]).cost < min) {
+                /* update the values */
                 min = (*nodes[i]).cost;
                 min_i = i;
             }
@@ -273,12 +286,20 @@ node_t * get_node(int dir, graph_t * graph, char * key) {
     loc_to_ints(key, &row, &col);
 
     if(dir == LEFT) {
+    /* if we want to move to the node by left in a matrix 
+    we need to decrement the j element of the matrix */
         col--;
     }else if(dir == RIGHT) {
+    /* if we want to move to the node by right in a matrix
+    we need to increment the j element of the matrix */
         col++;
     }else if (dir == UP) {
+    /* if we want to move the node by up in a matrix
+    we need to decrement the i element of the matrix */
         row--;
     }else if(dir == DOWN) {
+    /* if we want to move the node down in a matrix
+    we need to increment the i element of the matrix */
         row++;
     }
 
@@ -288,11 +309,15 @@ node_t * get_node(int dir, graph_t * graph, char * key) {
 void graph_set(graph_t * graph, char * start) {
     int srow, scol;
     loc_to_ints(start, &srow, &scol);
+    /* set the initial values to the starting variables */
     graph->nodes_ptrs[srow][scol].cost = 0;
+    graph->nodes_ptrs[srow][scol].visited_from = graph->nodes_ptrs[srow][scol].key;
 
+    /* hold the unvisited vertices */
     node_t ** unvisited_set = malloc(graph->size_cols * graph->size_rows*sizeof(node_t *));
     int u_s_i = 0;
     
+    /* we dont want to mutate the strucuture of the graph, so we take a copy of it*/
     int i = 0;
     for(; i < graph->size_rows; i++) {
         int j =0;
@@ -302,31 +327,57 @@ void graph_set(graph_t * graph, char * start) {
         }
     }
 
+    /* iterate through all the unvisited node and take them off the unvisited list*/
     while(!is_empty(unvisited_set, graph->size_cols * graph->size_rows)) {
         int min_i = get_min(unvisited_set, graph->size_cols * graph->size_rows);
+        /* we should never reach here for good input but better safe than sorry*/
         if(min_i == -1) {
             break;
         }
-        printf("%d\n", min_i);
-        node_t * u = unvisited_set[min_i];
-        printf("%s was the lowest\n", u->key);
+        
+        /* select the unvisited node that is marked with the smallest tentative distance */
+        node_t * curr = unvisited_set[min_i];
+        /* remove the current node from the unvisited set*/
         unvisited_set[min_i] = NULL;
-        printf("%d\n", u->left);
-        if(u->left < INF) {
-            node_t * l_node = get_node(LEFT, graph, u->key);
-            printf("%s\n", l_node->key);
+
+        /* check the current nodes neighbours and check if the quickest path is through
+        the current node, if so update the cost and visited_from*/
+
+        if(curr->left < INF) {
+            node_t * l_node = get_node(LEFT, graph, curr->key);
+            int cost = curr->cost + curr->left;
+            if(cost < l_node->cost) {
+                l_node->cost = cost;
+                l_node->visited_from = curr->key;
+            }
+            
         }
 
-        if(u->right < INF) {
-
+        if(curr->right < INF) {
+            node_t * r_node = get_node(RIGHT, graph, curr->key);
+            int cost = curr->cost + curr->right;
+            if(cost < r_node->cost) {
+                r_node->cost = cost;
+                r_node->visited_from = curr->key;
+            }
         }
 
-        if(u->down < INF) {
-
+        if(curr->down < INF) {
+            node_t * d_node = get_node(DOWN, graph, curr->key);
+            int cost = curr->cost + curr->down;
+            if(cost < d_node->cost) {
+                d_node->cost = cost;
+                d_node->visited_from = curr->key;
+            }
         }
 
-        if(u->up < INF) {
-
+        if(curr->up < INF) {
+            node_t * u_node = get_node(UP, graph, curr->key);
+            int cost = curr->cost + curr->up;
+            if(cost < u_node->cost) {
+                u_node->cost = cost;
+                u_node->visited_from = curr->key;
+            }
         }
     }
 
@@ -334,16 +385,20 @@ void graph_set(graph_t * graph, char * start) {
 }
 
 void free_graph(graph_t * graph) {
+    /* free the graphs */
     int i = 0;
     for(; i < graph->size_rows; i++) {
+        /* free the key holder */
         free(graph->nodes_ptrs[i]->key);
+        /* free the node*/
         free(graph->nodes_ptrs[i]);
     }
+    /* free the node pointer array holder */
     free(graph->nodes_ptrs);
 }
 
 int main() {
-    freopen("test_cases/test2.txt", "r", stdin);
+    freopen("test_cases/test1.txt", "r", stdin);
     /* read a line to get the dimensions of our matrix */
     char * line = read_line();
     tokens_arr_t tc = get_tokens(line, " ");
@@ -356,20 +411,26 @@ int main() {
 
     printf("S1: grid is %d x %d, and has %d intersections\n", cols, rows, rows*cols);
 
+    /* free the token holders */
     free(line);
     free(tc.tokens);
     tc.tokens = NULL;
     tc.token_count = 0;
 
+    /* create a rows * cols matrix */
     graph_t graph = create_graph(rows, cols);
     dests_t dests;
     dests.dest_count = 0;
+
     /* just malloc the most possible destinations we can have */
     dests.dests = malloc(rows*cols*sizeof(char *));
     assert(dests.dests != NULL);
 
+    /* store the variables for stage 1 in here */
     int not_possible_paths = 0;
     int total_cost = 0;
+
+    /* read the data into the graph and dests variables */
     read_to_graph_and_dests(&graph, &dests, &not_possible_paths, &total_cost);
 
     printf("S1: of %d possibilities, %d of them cannot be used\n", rows*cols*4, not_possible_paths);
@@ -378,8 +439,11 @@ int main() {
     printf("S1: %d grid locations supplied, first one is %s, last one is %s\n", 
         dests.dest_count, dests.dests[0], dests.dests[dests.dest_count-1]);
 
-    graph_set(&graph, "0e");
+    /* get all the shortest paths to every other destinations from arg1 */
+    graph_set(&graph, "0a");
 
+
+    /* free the graphs and dests */
     free(dests.dests);
     free_graph(&graph);
 
