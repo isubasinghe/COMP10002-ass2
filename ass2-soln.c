@@ -42,6 +42,8 @@ typedef struct {
 
 typedef struct {
     char * key;
+    char * visited_from;
+    int in_visited_list;
     int left;
     int right;
     int up;
@@ -160,12 +162,24 @@ graph_t create_graph(int rows, int cols) {
 }
 
 void loc_to_ints(char *loc, int * row, int * col) {
-    /* convert an char to an integer to access the graph by index*/
+    /* why the fuck won't this work, malloced memory is read/write, fuck this*/
+    
+    /*
     (*row) = loc[strlen(loc)-1] + SIMP_ASCII_TO_INT_DIFF;
-    /* if we set the last char to '\0' we can directly pass to atoi */
+
     loc[strlen(loc) - 1] = '\0';
-    /* convert the integer sequence to an actual int*/
     (*col) = atoi(loc);
+    */
+
+    char * line = strdup(loc);
+
+    (*row) = line[strlen(line) - 1] + SIMP_ASCII_TO_INT_DIFF;
+    line[strlen(line) - 1] = '\0';
+    (*col) = atoi(line);
+
+    free(line);
+
+
 }
 
 void insert_to_graph(graph_t * graph, tokens_arr_t tc, 
@@ -176,9 +190,9 @@ void insert_to_graph(graph_t * graph, tokens_arr_t tc,
 
     node_t node;
     node.key = strdup(tc.tokens[0]);
-    node.left = atoi(tc.tokens[1]);
+    node.right = atoi(tc.tokens[1]);
     node.up = atoi(tc.tokens[2]);
-    node.right = atoi(tc.tokens[3]);
+    node.left = atoi(tc.tokens[3]);
     node.down = atoi(tc.tokens[4]);
     node.cost = INF;
 
@@ -227,6 +241,98 @@ void read_to_graph_and_dests(graph_t * graph, dests_t * dests,
     }
 }
 
+int get_min(node_t ** nodes, int size) {
+    int min = 999;
+    int min_i = -1;
+    int i = 0;
+    for(; i < size; i++) {
+        if(nodes[i] != NULL) {
+            if((*nodes[i]).cost < min) {
+                min = (*nodes[i]).cost;
+                min_i = i;
+            }
+        }
+    }
+    return min_i;
+}
+
+int is_empty(node_t ** nodes, int size) {
+    int empty = 1;
+    int i = 0;
+    for(; i < size; i++) {
+        if(nodes[i] != NULL) {
+            empty = 0;
+            break;
+        }
+    }
+    return empty;
+}
+
+node_t * get_node(int dir, graph_t * graph, char * key) {
+    int row, col;
+    loc_to_ints(key, &row, &col);
+
+    if(dir == LEFT) {
+        col--;
+    }else if(dir == RIGHT) {
+        col++;
+    }else if (dir == UP) {
+        row--;
+    }else if(dir == DOWN) {
+        row++;
+    }
+
+    return &graph->nodes_ptrs[row][col];
+}
+
+void graph_set(graph_t * graph, char * start) {
+    int srow, scol;
+    loc_to_ints(start, &srow, &scol);
+    graph->nodes_ptrs[srow][scol].cost = 0;
+
+    node_t ** unvisited_set = malloc(graph->size_cols * graph->size_rows*sizeof(node_t *));
+    int u_s_i = 0;
+    
+    int i = 0;
+    for(; i < graph->size_rows; i++) {
+        int j =0;
+        for(; j < graph->size_cols; j++) {
+            unvisited_set[u_s_i] = &graph->nodes_ptrs[i][j];
+            u_s_i++;
+        }
+    }
+
+    while(!is_empty(unvisited_set, graph->size_cols * graph->size_rows)) {
+        int min_i = get_min(unvisited_set, graph->size_cols * graph->size_rows);
+        if(min_i == -1) {
+            break;
+        }
+        printf("%d\n", min_i);
+        node_t * u = unvisited_set[min_i];
+        printf("%s was the lowest\n", u->key);
+        unvisited_set[min_i] = NULL;
+        printf("%d\n", u->left);
+        if(u->left < INF) {
+            node_t * l_node = get_node(LEFT, graph, u->key);
+            printf("%s\n", l_node->key);
+        }
+
+        if(u->right < INF) {
+
+        }
+
+        if(u->down < INF) {
+
+        }
+
+        if(u->up < INF) {
+
+        }
+    }
+
+    free(unvisited_set);
+}
+
 void free_graph(graph_t * graph) {
     int i = 0;
     for(; i < graph->size_rows; i++) {
@@ -237,6 +343,7 @@ void free_graph(graph_t * graph) {
 }
 
 int main() {
+    freopen("test_cases/test2.txt", "r", stdin);
     /* read a line to get the dimensions of our matrix */
     char * line = read_line();
     tokens_arr_t tc = get_tokens(line, " ");
@@ -271,6 +378,7 @@ int main() {
     printf("S1: %d grid locations supplied, first one is %s, last one is %s\n", 
         dests.dest_count, dests.dests[0], dests.dests[dests.dest_count-1]);
 
+    graph_set(&graph, "0e");
 
     free(dests.dests);
     free_graph(&graph);
