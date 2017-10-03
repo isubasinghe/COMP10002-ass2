@@ -446,11 +446,6 @@ int main() {
     /* get all the shortest paths to every other destinations from arg1 */
     graph_set(&graph, dests.dests[dests.dest_count - 1]);
 
-
-
-    
-
-
     /* free the graphs and dests */
     free(dests.dests);
     free_graph(&graph);
