@@ -442,9 +442,8 @@ int main() {
 
     printf("S1: %d grid locations supplied, first one is %s, last one is %s\n", 
         dests.dest_count, dests.dests[0], dests.dests[dests.dest_count-1]);
-
-    /* get all the shortest paths to every other destinations from arg1 */
-    graph_set(&graph, dests.dests[dests.dest_count - 1]);
+    
+    
 
     /* free the graphs and dests */
     free(dests.dests);
