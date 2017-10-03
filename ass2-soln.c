@@ -71,7 +71,7 @@ void insert_to_graph(graph_t *, tokens_arr_t, int *, int *);
 
 void read_to_graph_and_dests(graph_t *, dests_t *, int *, int *);
 
-int get_min(node_t **, int)
+int get_min(node_t **, int);
 
 int is_empty(node_t **, int);
 
