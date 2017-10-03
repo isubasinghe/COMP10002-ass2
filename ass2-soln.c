@@ -307,6 +307,8 @@ node_t * get_node(int dir, graph_t * graph, char * key) {
 }
 
 void graph_set(graph_t * graph, char * start) {
+    /* dijkstra's algorithm, currently O(v^2) time, but can be 
+    reduced to O(v*log(v)) */
     int srow, scol;
     loc_to_ints(start, &srow, &scol);
     /* set the initial values to the starting variables */
@@ -341,8 +343,10 @@ void graph_set(graph_t * graph, char * start) {
         unvisited_set[min_i] = NULL;
 
         /* check the current nodes neighbours and check if the quickest path is through
-        the current node, if so update the cost and visited_from*/
+        the current node, if so update the cost and visited_from */
 
+        /* I really should have used an int array to store these, oh well
+        im not re writing all this code. */
         if(curr->left < INF) {
             node_t * l_node = get_node(LEFT, graph, curr->key);
             int cost = curr->cost + curr->left;
@@ -398,7 +402,7 @@ void free_graph(graph_t * graph) {
 }
 
 int main() {
-    freopen("test_cases/test1.txt", "r", stdin);
+    freopen("test_cases/test0.txt", "r", stdin);
     /* read a line to get the dimensions of our matrix */
     char * line = read_line();
     tokens_arr_t tc = get_tokens(line, " ");
@@ -440,7 +444,11 @@ int main() {
         dests.dest_count, dests.dests[0], dests.dests[dests.dest_count-1]);
 
     /* get all the shortest paths to every other destinations from arg1 */
-    graph_set(&graph, "0a");
+    graph_set(&graph, dests.dests[dests.dest_count - 1]);
+
+
+
+    
 
 
     /* free the graphs and dests */
