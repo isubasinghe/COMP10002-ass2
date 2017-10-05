@@ -496,6 +496,8 @@ int main() {
         get_directions(&graph, dests.dests[0], dests.dests[i]);
     }
 
+    reset_graph(&graph);
+
     /* free the graphs and dests */
     free(dests.dests);
     free_graph(&graph);
