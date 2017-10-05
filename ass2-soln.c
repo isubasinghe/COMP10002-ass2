@@ -267,6 +267,8 @@ int is_empty(node_t ** nodes, int size) {
     int i = 0;
     for(; i < size; i++) {
         if(nodes[i] != NULL) {
+            /* the pointer is a valid ponter so set 
+            set empty to false and break*/
             empty = 0;
             break;
         }
@@ -388,15 +390,19 @@ void get_directions(graph_t * graph, char * start, char * end) {
 
     int srow, scol;
     int erow, ecol;
-    
+    /* get the matrix positions of the start and end keys */
     loc_to_ints(start, &srow, &scol);
     loc_to_ints(end, &erow, &ecol);
 
+    /* while we haven't arrived at our starting point*/
     while(strcmp(start, end) != 0) {
+        /* take a pointer to the node where end is at */
         nodes_ptrs[np_i] = &graph->nodes_ptrs[erow][ecol];
         np_i++;
-        end = graph->nodes_ptrs[erow][ecol].visited_from;
         
+        /* update the end value to the node it is visited from*/
+        end = graph->nodes_ptrs[erow][ecol].visited_from;
+        /* update the end keys row and coloumn values */
         loc_to_ints(end, &erow, &ecol);
     }
 
@@ -435,7 +441,6 @@ void free_graph(graph_t * graph) {
 }
 
 int main() {
-    freopen("test_cases/test2.txt", "r", stdin);
     /* read a line to get the dimensions of our matrix */
     char * line = read_line();
     tokens_arr_t tc = get_tokens(line, " ");
@@ -470,6 +475,7 @@ int main() {
     /* read the data into the graph and dests variables */
     read_to_graph_and_dests(&graph, &dests, &not_possible_paths, &total_cost);
 
+    /* make sure we have been given at least 1 destination*/
     assert(dests.dest_count > 0);
 
     printf("S1: of %d possibilities, %d of them cannot be used\n", rows*cols*4, not_possible_paths);
@@ -478,10 +484,13 @@ int main() {
     printf("S1: %d grid locations supplied, first one is %s, last one is %s\n", 
         dests.dest_count, dests.dests[0], dests.dests[dests.dest_count-1]);
     
+    /* this is the newline between stage 1 and stage 2 */
     printf("\n");
 
     graph_set(&graph, dests.dests[0]);
 
+    /* iter through all the destinations and do
+    stage two on them */
     int i = 1;
     for(; i < dests.dest_count; i++) {
         get_directions(&graph, dests.dests[0], dests.dests[i]);
