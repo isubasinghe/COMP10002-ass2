@@ -43,7 +43,6 @@ typedef struct {
 typedef struct {
     char * key;
     char * visited_from;
-    int in_visited_list;
     int left;
     int right;
     int up;
@@ -78,6 +77,8 @@ int is_empty(node_t **, int);
 node_t * get_node(int, graph_t *, char *);
 
 void graph_set(graph_t *, char *);
+
+void get_directions(graph_t *, char *, char *);
 
 void free_graph(graph_t *);
 
@@ -170,14 +171,6 @@ graph_t create_graph(int rows, int cols) {
 }
 
 void loc_to_ints(char *loc, int * row, int * col) {
-    /* why the fuck won't this work, malloced memory is read/write, fuck this*/
-    
-    /*
-    (*row) = loc[strlen(loc)-1] + SIMP_ASCII_TO_INT_DIFF;
-
-    loc[strlen(loc) - 1] = '\0';
-    (*col) = atoi(loc);
-    */
 
     char * line = strdup(loc);
 
@@ -388,6 +381,46 @@ void graph_set(graph_t * graph, char * start) {
     free(unvisited_set);
 }
 
+void get_directions(graph_t * graph, char * start, char * end) {
+    node_t ** nodes_ptrs = malloc(graph->size_rows * graph->size_cols *sizeof(node_t *));
+    assert(nodes_ptrs != NULL);
+    int np_i = 0;
+
+    int srow, scol;
+    int erow, ecol;
+    
+    loc_to_ints(start, &srow, &scol);
+    loc_to_ints(end, &erow, &ecol);
+
+    while(strcmp(start, end) != 0) {
+        nodes_ptrs[np_i] = &graph->nodes_ptrs[erow][ecol];
+        np_i++;
+        end = graph->nodes_ptrs[erow][ecol].visited_from;
+        
+        loc_to_ints(end, &erow, &ecol);
+    }
+
+    printf("S2: start at grid %s, cost of %d\n", start, graph->nodes_ptrs[srow][scol].cost);
+
+    int i = np_i - 1;
+    for(; i >= 0; i--) {
+        printf("S2:       then to %s, cost of %d\n", nodes_ptrs[i]->key, nodes_ptrs[i]->cost);
+    }
+
+    free(nodes_ptrs);
+}
+
+void reset_graph(graph_t * graph) {
+    int i =0;
+    for(; i < graph->size_rows; i++) {
+        int j = 0;
+        for(; j < graph->size_cols; j++) {
+            graph->nodes_ptrs[i][j].cost = INF;
+            graph->nodes_ptrs[i][j].visited_from = NULL;
+        }
+    }
+}
+
 void free_graph(graph_t * graph) {
     /* free the graphs */
     int i = 0;
@@ -402,7 +435,7 @@ void free_graph(graph_t * graph) {
 }
 
 int main() {
-    freopen("test_cases/test0.txt", "r", stdin);
+    freopen("test_cases/test2.txt", "r", stdin);
     /* read a line to get the dimensions of our matrix */
     char * line = read_line();
     tokens_arr_t tc = get_tokens(line, " ");
@@ -437,13 +470,22 @@ int main() {
     /* read the data into the graph and dests variables */
     read_to_graph_and_dests(&graph, &dests, &not_possible_paths, &total_cost);
 
+    assert(dests.dest_count > 0);
+
     printf("S1: of %d possibilities, %d of them cannot be used\n", rows*cols*4, not_possible_paths);
     printf("S1: total cost of remaining possibilities is %d seconds\n", total_cost);
 
     printf("S1: %d grid locations supplied, first one is %s, last one is %s\n", 
         dests.dest_count, dests.dests[0], dests.dests[dests.dest_count-1]);
     
-    
+    printf("\n");
+
+    graph_set(&graph, dests.dests[0]);
+
+    int i = 1;
+    for(; i < dests.dest_count; i++) {
+        get_directions(&graph, dests.dests[0], dests.dests[i]);
+    }
 
     /* free the graphs and dests */
     free(dests.dests);
