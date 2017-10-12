@@ -8,19 +8,19 @@
  * 
  * Algorithms are fun
  * 
- * Note: This project was imported from a previous version
- * using a custom scanf functionality, therfore there may be some
- * redundencies.
  */
 
- #define READ_SIZE 16
 
-#define LEFT 0
-#define RIGHT 1
-#define UP 2
+#define READ_SIZE 16
+
+#define LEFT 2
+#define RIGHT 0
+#define UP 1
 #define DOWN 3
 
 #define NEIGHBOUR_SIZE 4
+
+#define CHAR2COL (-97)
 
 #define INF 999
 
@@ -29,25 +29,15 @@
 #include <stdlib.h>
 #include <assert.h>
 
+#include "dijkstra.h"
+
 typedef struct {
     int * keys_int;
     char * keys_char;
     int dest_count;
 } dests_t;
 
-typedef struct {
-    int key_int;
-    char key_char;
-    int from_int;
-    char from_char;
-    int * nxt_costs;
-    int cost;
-} node_t;
- 
-typedef struct {
-    node_t ** nodes_ptrs;
-    int rows, cols;
-} graph_t;
+
 
 void create_graph(graph_t *);
 
@@ -70,32 +60,25 @@ void create_graph(graph_t * graph) {
 }
 
 void read_paths(graph_t * graph, int * not_pos, int *tot_costs) {
-
-    int i = 0;
-    for(; i < graph->rows; i++) {
-        int j = 0;
-        for(; j < graph->cols; j++) {
-            
-            int key1;
-            char key2;
-            int * nxt_costs = malloc(NEIGHBOUR_SIZE * sizeof(int));
-            
-            scanf(" %d%c %d %d %d %d", &key1, &key2, 
-                &nxt_costs[0], &nxt_costs[1], &nxt_costs[2], &nxt_costs[3]);
-            int z = 0;
-            for(; z < NEIGHBOUR_SIZE; z++) {
-                if(nxt_costs[z] < 999) {
-                    (*tot_costs) += nxt_costs[z];
-                }else {
-                    (*not_pos)++;
-                }
+    int to_read = graph->rows * graph->cols;
+    for(; to_read > 0; to_read--) {
+        int keyi;
+        char keyc;
+        int * costs = malloc(NEIGHBOUR_SIZE*sizeof(int));
+        scanf(" %d%c %d %d %d %d", &keyi, &keyc,
+            &costs[RIGHT], &costs[UP], &costs[LEFT], &costs[DOWN]);
+        int i = 0;
+        for(; i < NEIGHBOUR_SIZE; i++) {
+            if(costs[i] < INF) {
+                (*tot_costs) += costs[i];
+            }else {
+                (*not_pos)++;
             }
-            graph->nodes_ptrs[i][j].key_int = key1;
-            graph->nodes_ptrs[i][j].key_char = key2;
-            graph->nodes_ptrs[i][j].nxt_costs = nxt_costs;
-            graph->nodes_ptrs[i][j].cost = INF;
-
         }
+        graph->nodes_ptrs[keyc+CHAR2COL][keyi].key_int = keyi;
+        graph->nodes_ptrs[keyc+CHAR2COL][keyi].key_char = keyc;
+        graph->nodes_ptrs[keyc+CHAR2COL][keyi].cost = INF;
+        graph->nodes_ptrs[keyc+CHAR2COL][keyi].nxt_costs = costs;    
     }
 }
 
@@ -135,44 +118,13 @@ void read_dests(dests_t * dests) {
 
 }
 
-void get_rows_cols(int * row, int * col, int key_int, char key_char) {
-    (*row) = key_char - 97;
-    (*col) = key_int;
-}
-
-void dijkstra(graph_t * graph, int skey_int, char skey_char) {
-    int row, col;
-    get_rows_cols(&row, &col, skey_int, skey_char);
-
-    graph->nodes_ptrs[row][col].cost = 0;
-    graph->nodes_ptrs[row][col].from_int =  graph->nodes_ptrs[row][col].key_int;
-    graph->nodes_ptrs[row][col].from_char =  graph->nodes_ptrs[row][col].key_char;
-
-    /* hold the unvisited vertices */
-    node_t ** unvisited_set = malloc(graph->cols*graph->rows*sizeof(node_t *));
-    int u_s_i = 0;
-   
-    /* we dont want to mutate the strucuture of the graph, so we take a copy of it*/
-    int i = 0;
-    for(; i < graph->rows; i++) {
-        int j =0;
-        for(; j < graph->cols; j++) {
-            unvisited_set[u_s_i] = &graph->nodes_ptrs[i][j];
-            u_s_i++;
-        }
-    }
-
-    
-
-    free(unvisited_set);
-
-}
 
 void free_dests(dests_t * dests) {
     free(dests->keys_int);
     free(dests->keys_char);
     dests->dest_count = 0;
 }
+
 
 void free_graph(graph_t * graph) {
    int i = 0;
@@ -188,13 +140,16 @@ void free_graph(graph_t * graph) {
    free(graph->nodes_ptrs);
 }
 
+
+
 int main() {
-    //freopen("test_cases/test2.txt", "r", stdin);
+    /* debugging option */
+    freopen("test_cases/test1.txt", "r", stdin);
     graph_t graph;
-    scanf(" %d%d", &graph.rows, &graph.cols);
+    scanf(" %d%d", &graph.cols, &graph.rows);
 
     printf("S1: grid is %d x %d, and has %d intersections\n", 
-        graph.rows, graph.cols, graph.rows*graph.cols);
+        graph.cols, graph.rows, graph.rows*graph.cols);
 
     create_graph(&graph);
 
@@ -217,6 +172,7 @@ int main() {
                 dests.keys_char[dests.dest_count -1]);
     printf("\n");
 
+    //print_graph(&graph);
 
     free_dests(&dests);
     free_graph(&graph);
