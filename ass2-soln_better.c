@@ -25,18 +25,31 @@
 #define INF 999
 
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
 #include <assert.h>
 
-#include "dijkstra.h"
+
+typedef struct {
+    /* although the method of storing by integer and char
+    is tedious, it saves memory*/
+    int key_int;
+    char key_char;
+    int from_int;
+    char from_char;
+    int * nxt_costs;
+    int cost;
+} node_t;
+ 
+typedef struct {
+    node_t ** nodes_ptrs;
+    int rows, cols;
+} graph_t;
 
 typedef struct {
     int * keys_int;
     char * keys_char;
     int dest_count;
 } dests_t;
-
 
 
 void create_graph(graph_t *);
