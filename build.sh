@@ -18,4 +18,4 @@ echo ""
 ./ass2 < test2.txt|| exit 1
 echo ""
 echo ""
-python diff_checker.py || exit 1
+
